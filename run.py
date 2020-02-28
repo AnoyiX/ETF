@@ -1,6 +1,6 @@
 from pingan import Fund, zh_count
 
-funds_code = ['163116', '001643', '162703', '005911', '320007', '003745', '519005', '257070', '161903', '519674', '519193', '001938']
+funds_code = ['001631', '001629', '501030', '004856']
 money = 100000
 
 if __name__ == '__main__':
@@ -36,8 +36,8 @@ if __name__ == '__main__':
     sorted_stocks = sorted(stocks.values(), key=lambda item: item.proportion, reverse=True)
     for stock in sorted_stocks:
         cost = int(money * stock.proportion / fund_count / 100)
-        # 选择投资金额大于 1000 的股票
-        if cost > 1000:
+        # 选择投资金额大于 500 的股票
+        if cost > 500:
             total_money += cost
             print('|', stock.name.ljust(52 - zh_count(stock.name)), stock.code.rjust(12), str('%.6f' % (stock.proportion / fund_count)).rjust(14), str(int(cost)).rjust(14), ' |')
     print('----------------------------------------------------------------------------------------------------')

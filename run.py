@@ -1,25 +1,21 @@
-from pingan import Fund, zh_count
-
-funds_code = ['001631', '001629', '501030', '004856']
-money = 100000
+from pingan import Fund
+from wasabi import msg
+from prettytable import PrettyTable
 
 if __name__ == '__main__':
-    funds = []
     stocks = {}
-    print('Your Money: ￥', money)
-    print('Loading fund data...')
-    print('----------------------------------------------------------------------------------------------------')
-    print('|', '基金列表'.center(92), "|")
-    print('----------------------------------------------------------------------------------------------------')
-    print('| 基金代码  基金全称                                                        基金资产     成立日期  |')
-    for code in funds_code:
-        fund = Fund(code)
-        fund.print_base()
-        if fund.stocks:
-            funds.append(fund)
-    print('----------------------------------------------------------------------------------------------------')
-    print('Data From 平安证券'.rjust(96))
-    print('')
+    money = float(input('投资金额（元）：'))
+    fund_codes = input('基金代码（多个基金以空格分隔）：')
+    with msg.loading("正在从平安证券加载数据中..."):
+        funds = [Fund(x.strip()) for x in fund_codes.split(' ')]
+
+    fund_table = PrettyTable()
+    fund_table.title = '基金列表'
+    fund_table.field_names = ['基金代码', '成立日期', '基金资产', '基金全称']
+    fund_data = [x.base() for x in funds]
+    fund_table.add_rows(fund_data)
+    print(fund_table)
+
     fund_count = len(funds)
     for fund in funds:
         for stock in fund.stocks:
@@ -28,21 +24,17 @@ if __name__ == '__main__':
             else:
                 stocks[stock.code] = stock
                 stocks[stock.code].proportion = float(stocks[stock.code].proportion) / fund_count
-    print('----------------------------------------------------------------------------------------------------')
-    print('|', '股票申购列表'.center(90), "|")
-    print('----------------------------------------------------------------------------------------------------')
-    print('| 股票名称                                                 股票代码      占净值比例       购入金额 |')
     total_money = 0
     sorted_stocks = sorted(stocks.values(), key=lambda item: item.proportion, reverse=True)
+    stock_table = PrettyTable()
+    stock_table.title = '股票列表'
+    stock_table.field_names = ['股票代码', '股票名称', '占净值比例', '买入金额']
+    stock_table.align['占净值比例'] = 'r'
+    stock_table.align['买入金额'] = 'r'
     for stock in sorted_stocks:
         cost = int(money * stock.proportion / fund_count / 100)
-        # 选择投资金额大于 500 的股票
-        if cost > 500:
-            total_money += cost
-            print('|', stock.name.ljust(52 - zh_count(stock.name)), stock.code.rjust(12), str('%.6f' % (stock.proportion / fund_count)).rjust(14), str(int(cost)).rjust(14), ' |')
-    print('----------------------------------------------------------------------------------------------------')
-    print('Author: Anoyi'.ljust(13), '合计: {} 元'.format(str(total_money)).rjust(83))
-    print('')
-    print('【注意】以上信息仅供参考，股市有风险，请理性投资！剩余零花钱 {} 元，建议存入余额宝/余利宝/零钱通等。'.format(int(money - total_money)))
-    print('')
-    print('')
+        total_money += cost
+        stock_table.add_row([stock.code, stock.name, "%.02f" % (stock.proportion / fund_count) + '%', "%.02f" % cost])
+    print(stock_table)
+    msg.good('总计买入: %.02f 元，剩余 %.02f 元，建议存入余额宝/余利宝/零钱通等。' % (total_money, money - total_money))
+    msg.warn('以上信息仅供参考，股市有风险，请理性投资！')

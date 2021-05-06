@@ -34,7 +34,7 @@ if __name__ == '__main__':
     for stock in sorted_stocks:
         cost = int(money * stock.proportion / fund_count / 100)
         total_money += cost
-        stock_table.add_row([stock.code, stock.name, "%.02f" % (stock.proportion / fund_count) + '%', "%.02f" % cost])
+        stock_table.add_row([stock.code, stock.name, f'{stock.proportion / fund_count:.02f}%', f'{cost:.02f}'])
     print(stock_table)
-    msg.good('总计买入: %.02f 元，剩余 %.02f 元，建议存入余额宝/余利宝/零钱通等。' % (total_money, money - total_money))
+    msg.good(f'总计买入: {total_money:.02f} 元，剩余 {money - total_money:.02f} 元，建议存入余额宝/余利宝/零钱通等。')
     msg.warn('以上信息仅供参考，股市有风险，请理性投资！')
